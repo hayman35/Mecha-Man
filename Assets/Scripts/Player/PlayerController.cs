@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
     public float GroundDistance;
     [SerializeField] private float speed, jumpForce;
     [SerializeField] private LayerMask ground;
+    [SerializeField] Transform firePoint;
+    [SerializeField] GameObject bulletPrefab;
     private PlayerActions playerActions;
     private Rigidbody2D player;
     private Collider2D collider;
@@ -34,7 +36,10 @@ public class PlayerController : MonoBehaviour
     private void Start() 
     {
         playerActions.Land.Jump.performed += _ => Jump();
+        playerActions.Land.Shoot.performed += _ => Shoot();
     }
+
+    
 
     private void Update() 
     {
@@ -53,6 +58,8 @@ public class PlayerController : MonoBehaviour
         Vector3 currentPosition = transform.position;
         currentPosition.x += moveInput * speed * Time.deltaTime;
         transform.position = currentPosition;
+        animator.SetBool("isGround", Grounded);
+
     }
 
     private void Jump()
@@ -60,8 +67,16 @@ public class PlayerController : MonoBehaviour
         if (Grounded)
         {
             animator.SetTrigger("Jump");
+            animator.SetBool("isGround",false);
             player.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         }
+    }
+
+    private void Shoot()
+    {
+        animator.SetTrigger("Shoot");
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Destroy(bullet,5f);
     }
 
 void OnCollisionStay2D(Collision2D collider)
